@@ -1,4 +1,4 @@
-package com.androrier.buttontoaction
+package com.androrier.buttontoaction.ui
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import com.androrier.buttontoaction.R
 import com.androrier.buttontoaction.databinding.ActivityMainBinding
 import com.androrier.buttontoaction.interfaces.OnActionSelectedListener
 import com.androrier.buttontoaction.viewmodel.MainViewModel
