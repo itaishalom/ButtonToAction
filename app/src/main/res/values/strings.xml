@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ButtonToAction</string>
+    <string name="action">Action!</string>
+    <string name="action_is_toast">Action is Toast!</string>
+    <string name="action_notification">Action Notification!</string>
+    <string name="no_action_available">No Action Available</string>
+    <string name="app_wont_work">Contacts will not work</string>
+    <string name="calling">Calling</string>
+    <string name="channel_name">Action</string>
+    <string name="channel_description">Notification Action</string>
+</resources>
