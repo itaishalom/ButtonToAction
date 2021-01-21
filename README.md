@@ -11,6 +11,8 @@ if it fails, it will load it from the app's assets.
 You can write your own backend server in order to test implementation (I did mine), and all
 you have to do is to change the ip address on NetworkingModule.kt to your own.
 
+Check my repo at https://github.com/itaishalom/SimpleServer for a simple config server.
+
 The viewModel is initialised with OnActionSelected listener in order to create separation between the view
 and the viewmodel.
 
