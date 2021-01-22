@@ -18,9 +18,8 @@ and the viewmodel.
 
 If you wish to add more actions:
 1. Add it to the Json file, the same format of the others.
-2. Add the declaration on the OnActionSelectedListener interface
-3. Implement on the view (MainActivity)
-4. Add the case the "onActionButtonPressed" function at the viewModel
+2. Implement the logic on the view (MainActivity)
+3. Add the type of the action and the name of the function functionMap on the MainActivity
 
 And that's it!
 
