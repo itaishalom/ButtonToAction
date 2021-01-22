@@ -19,21 +19,32 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.androrier.buttontoaction.R
 import com.androrier.buttontoaction.databinding.ActivityMainBinding
-import com.androrier.buttontoaction.interfaces.OnActionSelectedListener
 import com.androrier.buttontoaction.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), OnActionSelectedListener {
-    val TAG = "MainActivity"
+class MainActivity : AppCompatActivity() {
+
+    private val TAG = "MainActivity"
+
     val PERMISSIONS_REQUEST_READ_CONTACTS = 100
     val START_CALL = "startCall"
     val NOTIFICATION_ID = 123
     private val PICK_CONTACT: Int = 1234
 
     private val viewModel: MainViewModel by viewModels()
+
+    private val functionMap: Map<String, () -> Unit> =
+        mapOf(
+            "animation" to this::onAnimationAction,
+            "toast" to this::onToastAction,
+            "call" to this::onCallAction,
+            "notification" to this::onNotificationAction
+        )
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,19 +53,36 @@ class MainActivity : AppCompatActivity(), OnActionSelectedListener {
         )
 
         checkPermissionsForContacts()
-        viewModel.initViewModel(this)
         binding.viewmodel = viewModel
-        viewModel.noActionFound.observe(this, Observer {
-            toast(getString(R.string.no_action_available))
-        })
-        if (intent?.extras?.getBoolean(START_CALL) == true){
-            Log.i(TAG, "START_CALL true" )
+        observeViewModel()
+
+        if (intent?.extras?.getBoolean(START_CALL) == true) {
+            Log.i(TAG, "START_CALL true")
             startContacts()
         }
     }
 
-    override fun onAnimationAction() {
-        Log.i(TAG, "onAnimationAction" )
+
+    /**
+     * Observes the view model's live data
+     *
+     */
+    private fun observeViewModel(){
+        viewModel.noActionFound.observe(this, Observer {
+            toast(getString(R.string.no_action_available))
+        })
+        viewModel.actionFound.observe(this, Observer {
+            val func = functionMap[it]
+            if (func == null) {
+                toast(getString(R.string.action_not_defined))
+            } else {
+                func.invoke()
+            }
+        })
+    }
+
+    private fun onAnimationAction() {
+        Log.i(TAG, "onAnimationAction")
         val rotateAnimation = RotateAnimation(
             0.0f, 360.0f,
             RotateAnimation.RELATIVE_TO_SELF, 0.5f,
@@ -64,8 +92,8 @@ class MainActivity : AppCompatActivity(), OnActionSelectedListener {
         button.startAnimation(rotateAnimation)
     }
 
-    override fun onToastAction() {
-        Log.i(TAG, "onToastAction" )
+    private fun onToastAction() {
+        Log.i(TAG, "onToastAction")
         toast(getString(R.string.action_is_toast))
     }
 
@@ -74,8 +102,8 @@ class MainActivity : AppCompatActivity(), OnActionSelectedListener {
         startActivityForResult(intent, PICK_CONTACT)
     }
 
-    override fun onCallAction() {
-        Log.i(TAG, "startContacts" )
+    private fun onCallAction() {
+        Log.i(TAG, "startContacts")
         startContacts()
     }
 
@@ -83,10 +111,10 @@ class MainActivity : AppCompatActivity(), OnActionSelectedListener {
         super.onActivityResult(reqCode, resultCode, data)
         when (reqCode) {
             PICK_CONTACT -> if (resultCode == RESULT_OK) {
-                val contactUri = data?.getData()!!;
+                val contactUri = data?.data!!;
                 val projection =
                     arrayOf(ContactsContract.CommonDataKinds.Contactables.DISPLAY_NAME);
-                val cursor = this.getContentResolver().query(
+                val cursor = this.contentResolver.query(
                     contactUri, projection,
                     null, null, null
                 );
@@ -133,7 +161,7 @@ class MainActivity : AppCompatActivity(), OnActionSelectedListener {
     ) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG, "permission granted" )
+                Log.i(TAG, "permission granted")
             } else {
                 toast(getString(R.string.app_wont_work))
             }
@@ -141,13 +169,13 @@ class MainActivity : AppCompatActivity(), OnActionSelectedListener {
     }
 
     override fun onNewIntent(intent: Intent?) {
-        Log.i(TAG, "App new intent" )
+        Log.i(TAG, "App new intent")
         super.onNewIntent(intent)
         if (intent?.extras?.getBoolean(START_CALL) == true)
             startContacts()
     }
 
-    override fun onNotificationAction() {
+    private fun onNotificationAction() {
         val CHANNEL_ID = "NA"
         createNotificationChannel(CHANNEL_ID)
 

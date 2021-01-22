@@ -9,7 +9,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androrier.buttontoaction.interfaces.OnActionSelectedListener
 import com.androrier.buttontoaction.interfaces.Repository
 import com.androrier.buttontoaction.model.MyAction
 import kotlinx.coroutines.Dispatchers
@@ -28,9 +27,7 @@ class MainViewModel @ViewModelInject constructor(
                     addAll(repository.getAll())
                 }
             }
-            dataLoaded = true
-            Log.i(TAG, "Data loaded")
-            appReady.set(actionListenerSet && dataLoaded)
+            appReady.set(true)
         }
     }
 
@@ -38,21 +35,9 @@ class MainViewModel @ViewModelInject constructor(
     var appReady: ObservableField<Boolean> = ObservableField(false)
     val noActionFound: MutableLiveData<Boolean> = MutableLiveData()
     lateinit var allActions: TreeSet<MyAction>
-    lateinit var onActionSelectedListener: OnActionSelectedListener //OnActionSelected is a listener
-    var dataLoaded = false
-    var actionListenerSet = false
+    val actionFound: MutableLiveData<String> = MutableLiveData()
 
-    /**
-     * Initialise the viewModel class with the listener
-     *
-     * @param onActionSelectedListener
-     */
-    fun initViewModel(onActionSelectedListener: OnActionSelectedListener) {
-        this.onActionSelectedListener = onActionSelectedListener
-        Log.i(TAG, "Event listener set")
-        actionListenerSet = true
-        appReady.set(actionListenerSet && dataLoaded)
-    }
+
 
 
     /**
@@ -69,12 +54,7 @@ class MainViewModel @ViewModelInject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 repository.update(action)
                 withContext(Dispatchers.Main) {
-                    when (action.type) {
-                        "animation" -> onActionSelectedListener.onAnimationAction()
-                        "toast" -> onActionSelectedListener.onToastAction()
-                        "call" -> onActionSelectedListener.onCallAction()
-                        "notification" -> onActionSelectedListener.onNotificationAction()
-                    }
+                    actionFound.postValue(action.type)
                 }
             }
             return
